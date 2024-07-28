@@ -140,3 +140,146 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+//Subir este codigo al ardunio ESP32 desde el arduino IDE
+// #include <WiFi.h>
+// #include <FirebaseESP32.h>
+// #include <ESP32Servo.h>
+
+// #define WIFI_SSID "Ever0809"
+// #define WIFI_PASSWORD "12345678"
+// #define FIREBASE_HOST "domo-ut-a50a6-default-rtdb.firebaseio.com" 
+// #define FIREBASE_AUTH "AIzaSyAO4X9FU8o-eQHLelFyKVfXfr-tHZ8FNek" 
+
+// Servo myservo;
+
+// /* Pin del ESP32 y el HC-SR04 */
+// #define trigger_pin 23
+// #define Echo_pin 22
+
+// long duration;
+// int distance; 
+
+// FirebaseData firebaseData;
+// FirebaseConfig config;
+// FirebaseAuth auth;
+
+// bool previousMotorStatus = false;
+
+// void setup() {
+//   Serial.begin(115200); 
+//   delay(10);
+//   myservo.attach(18); 
+
+//   pinMode(trigger_pin, OUTPUT);
+//   pinMode(Echo_pin, INPUT); 
+
+//   //Configuración del GPIO
+//   pinMode(2, OUTPUT);
+//   digitalWrite(2, LOW);
+//   pinMode(4, OUTPUT);
+//   digitalWrite(4, LOW);
+
+//   Serial.println();
+//   Serial.println();
+//   Serial.print("Conectandose a red : ");
+//   Serial.println(WIFI_SSID);
+  
+//   WiFi.begin(WIFI_SSID, WIFI_PASSWORD); 
+  
+//   while (WiFi.status() != WL_CONNECTED) {
+//     delay(500);
+//     Serial.print(".");
+//   }
+  
+//   Serial.println("");
+//   Serial.println("WiFi conectado");
+
+//   config.host = FIREBASE_HOST;
+//   config.signer.tokens.legacy_token = FIREBASE_AUTH;
+
+//   Firebase.begin(&config, &auth);
+//   Firebase.reconnectWiFi(true);
+// }
+
+// void loop() {
+//   int pos;
+
+//   if (Firebase.getBool(firebaseData, "/Dispensador/Motor/Status")) {
+//     if (firebaseData.dataType() == "boolean") {
+//       bool motorStatus = firebaseData.boolData();
+
+//       if (motorStatus != previousMotorStatus) {
+//         previousMotorStatus = motorStatus;
+
+//         if (motorStatus) {
+//           Serial.println("Motor activado. Abriendo...");
+//           // Activar el motor (abrir)
+//           for (pos = 50; pos <= 60; pos += 3) {
+//             myservo.write(pos); 
+//             Serial.print("Posición del servo: ");
+//             Serial.println(pos);
+//             delay(6); 
+//           }
+
+//           // Medir el nivel con el sensor ultrasónico
+//           digitalWrite(trigger_pin, LOW);
+//           delayMicroseconds(2);
+
+//           // Pin of HC-SR04
+//           digitalWrite(trigger_pin, HIGH);  
+//           delayMicroseconds(10);
+//           digitalWrite(trigger_pin, LOW);
+
+//           // Measure the Echo output signal duration or pulse width
+//           duration = pulseIn(Echo_pin, HIGH); 
+//           distance = duration * 0.034 / 2; 
+
+//           Serial.print("Distance: ");
+//           Serial.print(distance);
+//           Serial.println(" cm");
+
+//           // Enviar el nivel de suministro a Firebase
+//           String nivel;
+//           if (distance >= 1 && distance <= 2) {
+//             nivel = "Lleno";
+//           } else if (distance >= 3 && distance <= 7) {
+//             nivel = "Medio";
+//           } else if (distance >= 8 && distance <= 10) {
+//             nivel = "Vacio";
+//           } else {
+//             nivel = "Desconocido";
+//           }
+
+//           if (Firebase.setString(firebaseData, "/Dispensador/Sensor/Nivel", nivel)) {
+//             Serial.println("Nivel de suministro enviado a Firebase.");
+//           } else {
+//             Serial.println("Error enviando nivel de suministro: " + firebaseData.errorReason());
+//           }
+
+//           delay(1000); 
+
+//           Serial.println("Motor desactivado. Cerrando...");
+//           // Desactivar el motor (cerrar)
+//           for (pos = 60; pos >= 0; pos -= 3) {
+//             myservo.write(pos); 
+//             Serial.print("Posición del servo: ");
+//             Serial.println(pos);
+//             delay(3);           
+//           }
+          
+//           // Resetear el estado del motor en Firebase
+//           if (Firebase.setBool(firebaseData, "/Dispensador/Motor/Status", false)) {
+//             Serial.println("Estado del motor reseteado a false en Firebase.");
+//           } else {
+//             Serial.println("Error reseteando el estado del motor en Firebase: " + firebaseData.errorReason());
+//           }
+//         }
+//       }
+//     }
+//   } else {
+//     Serial.println("Error al obtener el estado del motor: " + firebaseData.errorReason());
+//   }
+
+//   delay(1000); 
+// }
